@@ -161,6 +161,7 @@ class HastexoXBlock(XBlock,
     has_children = True
     icon_class = 'problem'
     block_settings_key = SETTINGS_KEY
+    show_in_read_only_mode = True
 
     @classmethod
     def parse_xml(cls, node, runtime, keys, id_generator):
