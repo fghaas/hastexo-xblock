@@ -1,3 +1,4 @@
+import errno
 import time
 import os
 import uuid
@@ -393,9 +394,24 @@ class LaunchStackTask(Task):
         connected = False
         while not connected:
             try:
-                ssh.connect(stack_ip, username=self.stack_user_name, pkey=pkey)
+                try:
+                    ssh.connect(stack_ip, username=self.stack_user_name,
+                                pkey=pkey)
+                except EnvironmentError as e:
+                    if e.errno in (errno.EAGAIN,
+                                   errno.ENETDOWN,
+                                   errno.ENETUNREACH,
+                                   errno.ENETRESET,
+                                   errno.ECONNABORTED,
+                                   errno.ECONNRESET,
+                                   errno.ENOTCONN,
+                                   errno.ECONNREFUSED,
+                                   errno.EHOSTDOWN,
+                                   errno.EHOSTUNREACH):
+                        self.sleep()
+                    else:
+                        raise
             except (EOFError,
-                    socket.error,
                     AuthenticationException,
                     SSHException,
                     NoValidConnectionsError):
