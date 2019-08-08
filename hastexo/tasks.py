@@ -395,6 +395,7 @@ class LaunchStackTask(Task):
             try:
                 ssh.connect(stack_ip, username=self.stack_user_name, pkey=pkey)
             except (EOFError,
+                    socket.error,
                     AuthenticationException,
                     SSHException,
                     NoValidConnectionsError):

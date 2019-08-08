@@ -698,6 +698,28 @@ class TestHastexoTasks(TestCase):
         # Assertions
         self.assertEqual(res["status"], "CREATE_COMPLETE")
 
+    def test_socketerror_does_not_constitute_verify_failure(self):
+        # Setup
+        provider = self.mock_providers[0]
+        provider.get_stack.side_effect = [
+            self.stacks["CREATE_COMPLETE"]
+        ]
+        ssh = self.get_ssh_client_mock()
+        ssh.connect.side_effect = [
+            socket.error,
+            True
+        ]
+        self.update_stack({
+            "provider": self.providers[0]["name"],
+            "status": "LAUNCH_PENDING"
+        })
+
+        # Run
+        res = LaunchStackTask().run(**self.kwargs)
+
+        # Assertions
+        self.assertEqual(res["status"], "CREATE_COMPLETE")
+
     def test_ssh_bombs_out(self):
         # Setup
         provider = self.mock_providers[0]
